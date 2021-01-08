@@ -1,19 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import FormContainer from "./FormContainer";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../actions/userActions";
 
-const RegisterScreen = () => {
+type RegisterScreenProps = {
+  history: any;
+};
+
+const RegisterScreen: React.FunctionComponent<RegisterScreenProps> = ({
+  history,
+}) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmpassowrd, setConfirmPassword] = useState("");
+  const [confirmpassword, setConfirmPassword] = useState("");
+  const [info, setInfo] = useState("");
+  const dispatch = useDispatch();
+  const { loading, success, userInfo } = useSelector(
+    (state: any) => state.userRegister
+  );
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+
+    if (confirmpassword !== password) {
+      console.log(`pass:${password}  and ${confirmpassword}`);
+      setInfo("password does not match");
+    } else {
+      dispatch(register(name, email, password));
+    }
+  };
+
+  useEffect(() => {
+    if (success) {
+      history.push("/login");
+    }
+  }, [success, history]);
 
   return (
     <div className="py-3">
       <FormContainer>
         <h1>Register </h1>
-        <Form>
+        <Form onSubmit={handleSubmit}>
           <Form.Group>
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -44,7 +75,7 @@ const RegisterScreen = () => {
           <Form.Group>
             <Form.Label>Confirm Password</Form.Label>
             <Form.Control
-              value={confirmpassowrd}
+              value={confirmpassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               type="password"
               placeholder="Re-enter Password"
@@ -60,6 +91,7 @@ const RegisterScreen = () => {
           </Col>
         </Row>
       </FormContainer>
+      {info}
     </div>
   );
 };
